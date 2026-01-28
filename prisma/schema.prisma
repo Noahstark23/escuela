@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      String   @default("USER")
+  employee  Employee?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Employee {
+  id          String    @id @default(uuid())
+  firstName   String
+  lastName    String
+  position    String
+  salary      Float?    @default(0)
+  hireDate    DateTime? @default(now())
+  email       String?   // Necesario para perfil
+  phone       String?   // Necesario para perfil
+  status      String    @default("ACTIVE") // Fix para el error de tipo
+  terminationDate DateTime?
+  userId      String?   @unique
+  user        User?     @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Student {
+  id          String        @id @default(uuid())
+  firstName   String
+  lastName    String
+  grade       String
+  status      String
+  guardianId  String
+  guardian    Guardian      @relation(fields: [guardianId], references: [id])
+  transactions Transaction[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Guardian {
+  id          String    @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String?
+  phone       String?
+  billingInfo String?
+  students    Student[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  date          DateTime @default(now())
+  amount        Float
+  type          String
+  paymentMethod String
+  reference     String?
+  proofUrl      String?
+  categoryId    String
+  category      TransactionCategory @relation(fields: [categoryId], references: [id])
+  studentId     String?
+  student       Student? @relation(fields: [studentId], references: [id])
+  employeeId    String?
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model TransactionCategory {
+  id          String        @id @default(uuid())
+  name        String
+  isExpense   Boolean
+  description String?
+  transactions Transaction[]
+}

@@ -1,65 +1,162 @@
-import Image from "next/image";
+import { PrismaClient } from "@prisma/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DollarSign, CreditCard, Activity, Users } from "lucide-react";
+import { CashFlowChart } from "@/components/dashboard/CashFlowChart";
+import { Button } from "@/components/ui/button";
+import { getMonthlyCollectionStats, getFinancialStats } from "@/actions/finance";
+import { CollectionStatus } from "@/components/dashboard/CollectionStatus";
+import { getTransactionCategories, getTransactions } from "@/actions/transactions";
+import { formatCurrency } from "@/lib/utils";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
-export default function Home() {
+const prisma = new PrismaClient();
+
+async function getFinancialData() {
+  const transactions = await prisma.transaction.findMany({
+    orderBy: { date: 'desc' },
+  });
+
+  const totalIncome = transactions
+    .filter((t) => t.type === "INGRESO")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const totalExpense = transactions
+    .filter((t) => t.type === "EGRESO")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const balance = totalIncome - totalExpense;
+
+  return {
+    totalIncome,
+    totalExpense,
+    balance,
+  };
+}
+
+import { IncomeDialog } from "@/components/dashboard/income-dialog";
+import { ExpenseDialog } from "@/components/dashboard/expense-dialog";
+
+export default async function DashboardPage() {
+  const { totalIncome, totalExpense, balance } = await getFinancialData();
+
+  const now = new Date();
+  const collectionStats = await getMonthlyCollectionStats(now.getMonth(), now.getFullYear());
+  const categories = await getTransactionCategories();
+  const chartData = await getFinancialStats();
+  const recentTransactions = await getTransactions({ limit: 5 });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard CFO</h2>
+        <div className="flex items-center space-x-2">
+          <IncomeDialog />
+          <ExpenseDialog />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
+            <DollarSign className="h-4 w-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-emerald-600">
+              {formatCurrency(totalIncome)}
+            </div>
+            <p className="text-xs text-muted-foreground">+20.1% vs mes anterior</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Gastos Totales</CardTitle>
+            <CreditCard className="h-4 w-4 text-red-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {formatCurrency(totalExpense)}
+            </div>
+            <p className="text-xs text-muted-foreground">+180.1% vs mes anterior</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Balance Neto</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              {formatCurrency(balance)}
+            </div>
+            <p className="text-xs text-muted-foreground">Cash Flow Actual</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Alumnos Activos</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{collectionStats.totalActive}</div>
+            <p className="text-xs text-muted-foreground">Total matriculados</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* New Collection Status Section */}
+      <div className="grid gap-4">
+        <CollectionStatus stats={collectionStats} categories={categories} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <CashFlowChart data={chartData} />
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>Transacciones Recientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-8">
+              {recentTransactions.map((t) => {
+                const isPayroll = !!t.employee;
+                const isStudentPayment = !!t.student;
+
+                let title = t.category.name;
+                let subtitle = "";
+
+                if (isPayroll) {
+                  title = "Pago de Nómina";
+                  subtitle = t.employee ? `${t.employee.firstName} ${t.employee.lastName}` : "";
+                } else if (isStudentPayment) {
+                  title = t.category.name;
+                  subtitle = t.student ? `${t.student.firstName} ${t.student.lastName}` : "";
+                } else {
+                  subtitle = t.reference && !t.reference.startsWith('{') ? t.reference : "General";
+                }
+
+                return (
+                  <div key={t.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium leading-none">{title}</p>
+                      <p className="text-sm text-muted-foreground">{subtitle}</p>
+                      <p className="text-xs text-muted-foreground/70">
+                        {format(new Date(t.date), "dd MMM, h:mm a", { locale: es })}
+                      </p>
+                    </div>
+                    <div className={`font-medium ${t.type === 'INGRESO' ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {t.type === 'INGRESO' ? '+' : '-'}{formatCurrency(t.amount)}
+                    </div>
+                  </div>
+                );
+              })}
+              {recentTransactions.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center">No hay transacciones recientes.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
+

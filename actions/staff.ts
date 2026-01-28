@@ -50,12 +50,9 @@ export async function createEmployee(data: {
                 lastName: data.lastName,
                 position: data.position,
                 salary: data.salary,
-                baseSalary: data.baseSalary || data.salary,
                 phone: data.phone,
                 email: data.email,
-                hireDate: data.hireDate,
-                cedula: data.cedula,
-                bankAccount: data.bankAccount,
+                hireDate: data.hireDate
             }
         });
         return { success: true, data: employee };
@@ -103,12 +100,9 @@ export async function updateEmployee(id: string, data: {
                 firstName: data.firstName,
                 lastName: data.lastName,
                 position: data.position,
-                baseSalary: data.baseSalary,
-                salary: data.baseSalary, // Keep synced
+                salary: data.baseSalary,
                 phone: data.phone,
-                email: data.email,
-                bankAccount: data.bankAccount,
-                cedula: data.cedula,
+                email: data.email
             }
         });
         return { success: true, data: employee };

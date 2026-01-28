@@ -58,9 +58,12 @@ export default function LiquidationCalculatorPage() {
     const [result, setResult] = useState<CalculationResult | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
+            employeeId: "",
             baseSalary: 0,
+            hireDate: "",
+            endDate: "",
             accumulatedVacation: 0,
         },
     });
@@ -72,9 +75,9 @@ export default function LiquidationCalculatorPage() {
     const handleEmployeeSelect = (employeeId: string) => {
         const employee = employees.find((e) => e.id === employeeId);
         if (employee) {
-            form.setValue("baseSalary", employee.baseSalary || employee.salary || 0);
+            form.setValue("baseSalary", employee.salary || 0);
             form.setValue("hireDate", employee.hireDate ? format(new Date(employee.hireDate), "yyyy-MM-dd") : "");
-            form.setValue("accumulatedVacation", employee.accumulatedVacation || 0);
+            form.setValue("accumulatedVacation", 0); // No existe accumulatedVacation en schema
         }
     };
 

@@ -10,9 +10,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export const Header = () => {
     const pathname = usePathname();
@@ -22,6 +22,7 @@ export const Header = () => {
         <div className="border-b">
             <div className="flex h-16 items-center px-4">
                 <div className="ml-auto flex items-center space-x-4">
+                    <NotificationBell />
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="relative h-8 w-8 rounded-full">

@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      String   @default("USER")
-  employee  Employee?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  role          String         @default("USER")
+  employee      Employee?
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Employee {
@@ -36,16 +37,19 @@ model Employee {
 }
 
 model Student {
-  id          String        @id @default(uuid())
-  firstName   String
-  lastName    String
-  grade       String
-  status      String
-  guardianId  String
-  guardian    Guardian      @relation(fields: [guardianId], references: [id])
-  transactions Transaction[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id            String         @id @default(uuid())
+  firstName     String
+  lastName      String
+  grade         String
+  status        String
+  guardianId    String
+  guardian      Guardian       @relation(fields: [guardianId], references: [id])
+  transactions  Transaction[]
+  notifications Notification[]
+  paymentPlans  PaymentPlan[]
+  discounts     Discount[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Guardian {
@@ -61,22 +65,23 @@ model Guardian {
 }
 
 model Transaction {
-  id            String   @id @default(uuid())
-  date          DateTime @default(now())
-  amount        Float
-  type          String
-  paymentMethod String
-  reference     String?
-  proofUrl      String?
-  categoryId    String
-  category      TransactionCategory @relation(fields: [categoryId], references: [id])
-  studentId     String?
-  student       Student? @relation(fields: [studentId], references: [id])
-  employeeId    String?
-  employee      Employee? @relation(fields: [employeeId], references: [id])
-  description   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String          @id @default(uuid())
+  date           DateTime        @default(now())
+  amount         Float
+  type           String
+  paymentMethod  String
+  reference      String?
+  proofUrl       String?
+  categoryId     String
+  category       TransactionCategory @relation(fields: [categoryId], references: [id])
+  studentId      String?
+  student        Student?        @relation(fields: [studentId], references: [id])
+  employeeId     String?
+  employee       Employee?       @relation(fields: [employeeId], references: [id])
+  description    String?
+  partialPayment PartialPayment?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model TransactionCategory {
@@ -85,4 +90,64 @@ model TransactionCategory {
   isExpense   Boolean
   description String?
   transactions Transaction[]
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String   // PAYMENT_PENDING, PAYMENT_RECEIVED, MONTHLY_DUE, SYSTEM, ALERT
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  priority  String   @default("MEDIUM") // LOW, MEDIUM, HIGH
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id])
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+}
+
+model PaymentPlan {
+  id            String           @id @default(uuid())
+  studentId     String
+  student       Student          @relation(fields: [studentId], references: [id])
+  totalAmount   Float
+  paidAmount    Float            @default(0)
+  installments  Int
+  frequency     String           // MONTHLY, WEEKLY, CUSTOM
+  startDate     DateTime
+  endDate       DateTime?
+  status        String           @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  description   String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  payments      PartialPayment[]
+}
+
+model PartialPayment {
+  id            String      @id @default(uuid())
+  planId        String
+  plan          PaymentPlan @relation(fields: [planId], references: [id])
+  transactionId String      @unique
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  amount        Float
+  dueDate       DateTime
+  paidAt        DateTime?
+  status        String      @default("PENDING") // PENDING, PAID, OVERDUE
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Discount {
+  id         String   @id @default(uuid())
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id])
+  type       String   // PERCENTAGE, FIXED
+  value      Float
+  reason     String
+  startDate  DateTime
+  endDate    DateTime?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

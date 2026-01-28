@@ -12,6 +12,7 @@ import {
     Settings,
     School,
     LogOut,
+    FileText,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -40,7 +41,12 @@ const routes = [
         href: "/staff",
         color: "text-pink-700",
     },
-
+    {
+        label: "Reportes",
+        icon: FileText,
+        href: "/reports",
+        color: "text-orange-500",
+    },
     {
         label: "Configuración",
         icon: Settings,

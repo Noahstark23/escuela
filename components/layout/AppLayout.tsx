@@ -1,12 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const isLoginPage = pathname === "/login";
+    const [searchOpen, setSearchOpen] = useState(false);
+
+    // Keyboard shortcuts
+    useKeyboardShortcuts({
+        onSearchOpen: () => setSearchOpen(true),
+    });
 
     if (isLoginPage) {
         return <>{children}</>;
@@ -21,6 +30,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Header />
                 {children}
             </main>
+
+            {/* Global Search Modal */}
+            <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
         </div>
     );
 }

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { StudentFinancialChart } from "@/components/students/student-financial-chart";
+import { StudentStatementButton } from "@/components/students/StudentStatementButton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default async function StudentDetailPage({ params }: { params: { id: string } }) {
@@ -24,12 +25,18 @@ export default async function StudentDetailPage({ params }: { params: { id: stri
         <div className="flex-1 space-y-6 p-8 pt-6">
             {/* Header / Navigation */}
             <div className="flex items-center gap-4">
-                <Link href="/students">
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
+                <Link
+                    href="/students"
+                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Volver a Alumnos
                 </Link>
-                <div className="flex items-center gap-4">
+                <StudentStatementButton
+                    studentId={params.id}
+                    studentName={`${student.firstName} ${student.lastName}`}
+                />
+                <div className="flex items-center gap-4 ml-auto"> {/* Adjusted for new layout */}
                     <Avatar className="h-16 w-16 border-2 border-white shadow-sm">
                         <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${initials}`} />
                         <AvatarFallback>{initials}</AvatarFallback>

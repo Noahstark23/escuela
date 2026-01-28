@@ -58,8 +58,7 @@ export async function createUser(email: string, role: string = "ADMIN") {
             data: {
                 email,
                 password: hashedPassword,
-                role,
-                name: email.split('@')[0]
+                role
             }
         });
         revalidatePath("/settings");

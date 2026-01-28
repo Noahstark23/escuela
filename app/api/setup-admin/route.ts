@@ -34,7 +34,6 @@ export async function GET() {
             },
             create: {
                 email: "admin@school.com",
-                name: "Admin Principal",
                 password: hashedPassword,
                 role: "ADMIN",
             },

@@ -1,5 +1,14 @@
 # 🚀 Guía de Deployment en VPS
 
+## ⚠️ IMPORTANTE - SOLO PARA SERVIDORES SIN COOLIFY
+
+**Si tu servidor YA TIENE Coolify instalado, NO uses esta guía.**  
+**Usa:** `coolify_deployment.md` en su lugar.
+
+Este script instala nginx, PM2, y Node.js directamente en el host, lo cual **destruirá** tu instalación de Coolify.
+
+---
+
 ## Información del Servidor
 
 - **IP:** 206.189.183.163

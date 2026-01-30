@@ -127,15 +127,21 @@ export async function getUnreadCount(userId?: string) {
     try {
         const count = await db.notification.count({
             where: {
-                OR: [
-                    { userId: userId || null },
-                    { userId: null },
-                ],
-                isRead: false,
-                OR: [
-                    { expiresAt: null },
-                    { expiresAt: { gte: new Date() } },
-                ],
+                AND: [
+                    {
+                        OR: [
+                            { userId: userId },
+                            { userId: null }
+                        ]
+                    },
+                    { isRead: false },
+                    {
+                        OR: [
+                            { expiresAt: null },
+                            { expiresAt: { gte: new Date() } }
+                        ]
+                    }
+                ]
             },
         });
 

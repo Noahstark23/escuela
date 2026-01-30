@@ -48,14 +48,20 @@ export async function createNotification(params: CreateNotificationParams) {
 export async function getNotifications(userId?: string) {
     try {
         const where: any = {
-            OR: [
-                { userId: userId || null },
-                { userId: null }, // Notificaciones globales
-            ],
-            OR: [
-                { expiresAt: null },
-                { expiresAt: { gte: new Date() } },
-            ],
+            AND: [
+                {
+                    OR: [
+                        { userId: userId },
+                        { userId: null }
+                    ]
+                },
+                {
+                    OR: [
+                        { expiresAt: null },
+                        { expiresAt: { gte: new Date() } }
+                    ]
+                }
+            ]
         };
 
         const notifications = await db.notification.findMany({

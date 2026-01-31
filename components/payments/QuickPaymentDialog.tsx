@@ -93,7 +93,7 @@ export function QuickPaymentDialog({
                     return;
                 }
 
-                planId = newPlan.plan.id;
+                planId = newPlan.plan?.id;
             }
 
             // Obtener categoría de mensualidad (suponiendo que existe)

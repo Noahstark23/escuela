@@ -32,7 +32,8 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
                                 tickFormatter={(value) => `$${value}`}
                             />
                             <Tooltip
-                                formatter={(value: number) => [`$${value.toLocaleString()}`, undefined]}
+                                // Hotfix: use `any` because Recharts may pass undefined, and return a tuple of [string, string]
+                                formatter={(value: any) => [`$${Number(value).toLocaleString()}`, '']}
                                 cursor={{ fill: 'transparent' }}
                             />
                             <Legend />

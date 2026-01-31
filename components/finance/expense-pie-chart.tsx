@@ -30,7 +30,7 @@ export function ExpensePieChart({ data }: ExpensePieChartProps) {
                                     <Cell key={`cell-${index}`} fill={entry.fill} />
                                 ))}
                             </Pie>
-                            <Tooltip formatter={(value: number) => `$${value.toLocaleString()}`} />
+                            <Tooltip formatter={(value: any) => `$${Number(value || 0).toLocaleString()}`} />
                             <Legend verticalAlign="bottom" height={36} />
                         </PieChart>
                     </ResponsiveContainer>

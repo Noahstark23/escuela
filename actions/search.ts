@@ -50,14 +50,14 @@ export async function globalSearch(query: string): Promise<SearchResult> {
             db.student.findMany({
                 where: {
                     OR: [
-                        { firstName: { contains: searchTerm, mode: "insensitive" } },
-                        { lastName: { contains: searchTerm, mode: "insensitive" } },
-                        { grade: { contains: searchTerm, mode: "insensitive" } },
+                        { firstName: { contains: searchTerm } },
+                        { lastName: { contains: searchTerm } },
+                        { grade: { contains: searchTerm } },
                         {
                             guardian: {
                                 OR: [
-                                    { firstName: { contains: searchTerm, mode: "insensitive" } },
-                                    { lastName: { contains: searchTerm, mode: "insensitive" } },
+                                    { firstName: { contains: searchTerm } },
+                                    { lastName: { contains: searchTerm } },
                                 ],
                             },
                         },
@@ -81,9 +81,9 @@ export async function globalSearch(query: string): Promise<SearchResult> {
             db.employee.findMany({
                 where: {
                     OR: [
-                        { firstName: { contains: searchTerm, mode: "insensitive" } },
-                        { lastName: { contains: searchTerm, mode: "insensitive" } },
-                        { position: { contains: searchTerm, mode: "insensitive" } },
+                        { firstName: { contains: searchTerm } },
+                        { lastName: { contains: searchTerm } },
+                        { position: { contains: searchTerm } },
                     ],
                 },
                 select: {
@@ -103,8 +103,8 @@ export async function globalSearch(query: string): Promise<SearchResult> {
             db.transaction.findMany({
                 where: {
                     OR: [
-                        { reference: { contains: searchTerm, mode: "insensitive" } },
-                        { description: { contains: searchTerm, mode: "insensitive" } },
+                        { reference: { contains: searchTerm } },
+                        { description: { contains: searchTerm } },
                         // Buscar por monto (si es número)
                         ...(isNaN(Number(searchTerm))
                             ? []
